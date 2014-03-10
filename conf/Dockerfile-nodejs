@@ -1,0 +1,16 @@
+FROM devric/nodejs
+
+# Set up
+RUN apt-get update --fix-missing
+RUN apt-get install -y python-software-properties python g++ make
+RUN add-apt-repository ppa:chris-lea/node.js
+RUN apt-get update
+RUN apt-get install nodejs
+
+ADD . /www
+
+RUN cd /www; npm install
+
+EXPOSE 8000:8000
+
+CMD ["node", "/www/index.js"]

@@ -8,6 +8,7 @@ Vagrant.configure("2") do |config|
   # Ports
   # ======================================
   config.vm.network "private_network", ip: "172.12.8.150"
+  config.vm.network :forwarded_port, :host => 48000, :guest => 8000
 
   # Expose VM ports to host
   config.vm.network :forwarded_port, :host => 4243, :guest => 4243
@@ -28,10 +29,11 @@ Vagrant.configure("2") do |config|
   # NFS setup
   # ======================================
   config.vm.synced_folder "../", "/home/core/share", id: "core", :nfs => true,  :mount_options   => ['nolock,vers=3,udp']
+  config.vm.synced_folder "conf", "/home/core/conf", id: "conf", :nfs => true,  :mount_options   => ['nolock,vers=3,udp']
+  config.vm.synced_folder "data", "/home/core/data", id: "conf", :nfs => true,  :mount_options   => ['nolock,vers=3,udp']
 
   # Provision
   # ======================================
-  config.vm.synced_folder "conf", "/home/core/conf", id: "conf", :nfs => true,  :mount_options   => ['nolock,vers=3,udp']
   config.vm.provision "shell",
     inline: %Q{
         # add service file

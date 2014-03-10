@@ -1,0 +1,59 @@
+FROM devric/ubuntu
+
+# Update
+RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get -y upgrade
+
+# Keep upstart from complaining
+RUN dpkg-divert --local --rename --add /sbin/initctl
+RUN ln -sf /bin/true /sbin/initctl
+
+# Basic Requirements
+RUN apt-get -y install mysql-server nginx php5-fpm php5-mysql php-apc pwgen python-setuptools curl unzip
+
+# Additional thingys
+RUN apt-get -y install php5-curl php5-gd php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl php5-cli php5-xdebug
+
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer && chmod +x /usr/local/bin/composer
+
+# Add composer to path
+RUN echo root:root | chpasswd && \
+    useradd u -s /bin/bash -m -p `perl -e 'print crypt("u", "salt"),"\n"'` && \
+    echo 'u	ALL=(ALL:ALL) ALL' >> /etc/sudoers && \
+    echo "export PATH=$PATH:/.composer/vendor/bin/:" >> /home/core/.profile
+
+# install phpunit
+RUN composer global require 'phpunit/phpunit=3.7.*' && \
+    echo "export PATH=$PATH:/.composer/vendor/bin/:" >> /root/.profile
+
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf && \
+    echo "cgi.fix_pathinfo = 0;" >> /etc/php5/fpm/php.ini
+
+# mysql config
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+
+# nginx config
+RUN sed -i -e"s/keepalive_timeout\s*65/keepalive_timeout 2/" /etc/nginx/nginx.conf
+RUN sed -i -e"s/keepalive_timeout 2/keepalive_timeout 2;\n\tclient_max_body_size 100m/" /etc/nginx/nginx.conf
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+
+# nginx site conf
+ADD /home/core/share/conf/nginx-site.conf /etc/nginx/sites-available/default
+
+# php-fpm config
+RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
+RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" /etc/php5/fpm/php.ini
+RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" /etc/php5/fpm/php.ini
+RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php5/fpm/php-fpm.conf
+RUN find /etc/php5/cli/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
+
+# RUN mkdir /www && echo "<?php phpinfo(); ?>" > /www/index.php
+
+EXPOSE 80
+
+ENTRYPOINT ["/bin/bash"]
+
+CMD ["run.sh"]

@@ -25,3 +25,12 @@ docker run -i -p 49800:8000 -v ~/Sites/projects:/www dockerImageName /bin/bash
 ## Docker files
 
 - use entrypoints
+- mount folder in VM
+
+```
+/home/core/share
+         - projects
+         - test
+         - work
+```
+
