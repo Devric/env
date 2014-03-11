@@ -19,7 +19,11 @@ download the dotcloud docker excuteble to access directly from mac, all ports ar
 eg:
 
 ```
+// default run
 docker run -i -p 49800:8000 -v ~/Sites/projects:/www dockerImageName /bin/bash
+
+// mysql
+-v /home/core/share/env/data/mysql:/var/lib/mysql
 ```
 
 ## Docker files
@@ -33,4 +37,5 @@ docker run -i -p 49800:8000 -v ~/Sites/projects:/www dockerImageName /bin/bash
          - test
          - work
 ```
+
 
