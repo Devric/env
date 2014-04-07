@@ -8,11 +8,10 @@ Vagrant.configure("2") do |config|
   # Ports
   # ======================================
   config.vm.network "private_network", ip: "172.12.8.150"
-  config.vm.network :forwarded_port, :host => 48000, :guest => 8000
 
   # Expose VM ports to host
   config.vm.network :forwarded_port, :host => 4243, :guest => 4243
-  (49000..49900).each do |port|
+  (49000..49050).each do |port|
     config.vm.network :forwarded_port, :host => port, :guest => port
   end
 

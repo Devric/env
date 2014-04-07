@@ -1,6 +1,5 @@
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor
-ADD ./supervisord.conf /etc/supervisord.conf
 
 # Install Wordpress
 ADD http://wordpress.org/latest.tar.gz /usr/share/nginx/latest.tar.gz
